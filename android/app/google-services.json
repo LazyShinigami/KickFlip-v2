@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "920219711832",
+    "firebase_url": "https://kick-flip-app-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "kick-flip-app",
+    "storage_bucket": "kick-flip-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:920219711832:android:01ed46edbd8e1d6e628d2d",
+        "android_client_info": {
+          "package_name": "com.example.kickflip"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCwplGXDWpDXKRLbtCDBOkuceR_tGS_YlQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
