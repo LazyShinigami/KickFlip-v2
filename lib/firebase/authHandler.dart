@@ -26,7 +26,7 @@ class AuthService {
       if (user != null) {
         // Wait for getOtherUserDetails() to complete before continuing
         Map deets = await getOtherUserDetails(user.email!);
-        print(deets);
+        // print(deets);
         yield KFUser(
           email: user.email!,
           type: deets['type'],
@@ -50,7 +50,7 @@ class AuthService {
   }
 
   // create acc - email, pwd, name, type
-  Future signUpWithUserCredentials({
+  Future<String> signUpWithUserCredentials({
     required String name,
     required String type,
     required String email,
@@ -66,6 +66,7 @@ class AuthService {
         'type': type,
         'uID': generateUID(),
       });
+      return '';
     } on FirebaseAuthException catch (e) {
       return e.message.toString();
     }
@@ -95,6 +96,7 @@ class AuthService {
   // get all user data - if acc exists
 
   // logout
+
   Future logout() async {
     _auth.signOut();
   }

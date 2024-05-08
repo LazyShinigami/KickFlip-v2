@@ -4,8 +4,8 @@ import 'package:kickflip/models.dart';
 import 'package:kickflip/screens/commonElements/appbar.dart';
 
 class ProductDetailPage extends StatefulWidget {
-  const ProductDetailPage({super.key, required this.pID});
-  final int pID;
+  const ProductDetailPage({super.key, required this.sneaker});
+  final KFProduct sneaker;
 
   @override
   State<ProductDetailPage> createState() => _ProductDetailPageState();
@@ -14,21 +14,11 @@ class ProductDetailPage extends StatefulWidget {
 class _ProductDetailPageState extends State<ProductDetailPage> {
   final TextEditingController controller = TextEditingController();
 
-  // Dummy Data
-  late SneakerDetailPageItem item;
   @override
   void initState() {
     // TODO: fetch it from the servers
     super.initState();
     controller.text = '0';
-    item = SneakerDetailPageItem(
-        pID: widget.pID,
-        title: "Jordan New Very Lengthy Name Just For Testing Purposes",
-        desc:
-            "des weuofh wrgwr gr0g rwg wrg w f-se fs fr geth s fs gr gsrg rgrgg s h sth s gsr vw9g 4 4w049g  9 w w fwf w rvjrv dirovj drv djibdg bdb  gbghb09dgj bi dfj0df  egrc.",
-        sellerName: "Seller 123",
-        imgURL: ['a.png', 'b.jpg', 'c.jpeg', 'd.jpg', 'e.png'],
-        fav: false);
   }
 
   @override
@@ -60,7 +50,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                 children: [
                   Expanded(
                     child: MyText(
-                      item.title,
+                      widget.sneaker.name,
                       size: width * 0.04,
                       weight: FontWeight.bold,
                       spacing: 1.25,
@@ -68,20 +58,21 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   ),
                   IconButton(
                     onPressed: () {
-                      item.fav = !item.fav;
+                      // item.fav = !item.fav;
                       // Put a Firebase function here to update wishlist on the sever as well
                       print(
                           'Favorite functionality called from the details screen');
                       setState(() {});
                     },
                     icon: Icon(
-                      (item.fav)
-                          ? Icons.favorite_rounded
-                          : Icons.favorite_border_rounded,
-                      color: (item.fav)
-                          ? const Color(0xFFFA1D6E)
-                          : const Color(0x739E9E9E),
-                    ),
+                        // (item.fav)
+                        Icons.favorite_rounded,
+                        // : Icons.favorite_border_rounded,
+                        color:
+                            // (item.fav)
+                            const Color(0xFFFA1D6E)
+                        // : const Color(0x739E9E9E),
+                        ),
                   ),
                 ],
               ),
@@ -91,7 +82,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                 weight: FontWeight.bold,
               ),
               MyText(
-                item.desc,
+                widget.sneaker.desc,
                 size: 15,
                 color: const Color(0xFF3B3B3B),
               ),
@@ -99,7 +90,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
               const Divider(color: Colors.grey, thickness: 0.75),
               const SizedBox(height: 10),
               MyText(
-                'Sold by:  ${item.sellerName}',
+                'Sold by:  ${widget.sneaker.sID}',
                 size: 14,
                 color: const Color.fromARGB(255, 86, 86, 86),
               ),

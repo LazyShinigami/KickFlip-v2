@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:kickflip/commons.dart';
 import 'package:kickflip/constants.dart';
+import 'package:kickflip/firebase/firestoreHandler.dart';
 import 'package:kickflip/models.dart';
 import 'package:kickflip/screens/commonElements/appbar.dart';
 import 'package:kickflip/screens/commonElements/bottomNavBar.dart';
@@ -18,68 +19,16 @@ class _BuyerHomepageState extends State<BuyerHomepage> {
   _BuyerHomepageState(this.user);
   final KFUser user;
   final _searchController = TextEditingController();
+  late Future<List<KFProduct>> sneakers;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    sneakers = FirestoreService().getAllProducts();
+  }
 
   // bottom nav bar settings
   final int _selectedIndex = 0;
-
-  List<String> shoeList = [
-    'Jordan 1 Retro Low 85',
-    'Nike KD 4 Galaxy (2024)',
-    'Nike Blazer Mid 77 Vintage White Black',
-    'Jordan 11 Retro DMP Gratitude',
-    'Jordan 1 Retro High OG SP',
-    'Jordan 1 Retro Low OG SP',
-  ];
-  List<Sneakers> sneakers = [
-    Sneakers(
-        pID: 12335324,
-        title: 'Jordan 1 Retkgkkkhcjgcjgcjcgcjcro Low 85',
-        desc: 'Jordan 1 Retro Low 85 shoeeeesss',
-        status: 'listed',
-        imgURL: ['Jordan 1 Retro Low 85.webp'],
-        sellingPrice: 12,
-        sID: 32124),
-    Sneakers(
-        pID: 2315253,
-        title: 'Nike KD 4 Galaxy (2024)',
-        desc: 'Nike KD 4 Galaxy (2024) shoeeeeessssssss',
-        status: 'listed',
-        imgURL: ['Jordan 1 Retro Low 85.webp'],
-        sellingPrice: 12,
-        sID: 21232),
-    Sneakers(
-        pID: 2213313,
-        title: 'Nike Blazer Mid 77 Vintage White Black',
-        desc: 'Nike Blazer Mid 77 Vintage White Black shoeeeeessssssss',
-        status: 'listed',
-        imgURL: ['Jordan 1 Retro Low 85.webp'],
-        sellingPrice: 12,
-        sID: 32523),
-    Sneakers(
-        pID: 2313432,
-        title: 'Jordan 11 Retro DMP Gratitude',
-        desc: 'Jordan 11 Retro DMP Gratitude shoeeeeessssssss',
-        status: 'listed',
-        imgURL: ['Jordan 1 Retro Low 85.webp'],
-        sellingPrice: 12,
-        sID: 87546),
-    Sneakers(
-        pID: 23121213,
-        title: 'Jordan 1 Retro High OG SP',
-        desc: 'Jordan 1 Retro High OG SP shoeeeeessssssss',
-        status: 'listed',
-        imgURL: ['Jordan 1 Retro Low 85.webp'],
-        sellingPrice: 12,
-        sID: 94864),
-    Sneakers(
-        pID: 2387913,
-        title: 'Jordan 1 Retro Low OG SP',
-        desc: 'Jordan 1 Retro Low OG SP shoeeeeessssssss',
-        status: 'listed',
-        imgURL: ['Jordan 1 Retro Low 85.webp'],
-        sellingPrice: 12,
-        sID: 94864),
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -120,16 +69,42 @@ class _BuyerHomepageState extends State<BuyerHomepage> {
                   const SizedBox(height: 15),
 
                   // Product Row
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: [
-                        const SizedBox(width: 15),
-                        for (int i = 0; i < sneakers.length; i++)
-                          SneakerTile(sneaker: sneakers[i])
-                      ],
-                    ),
-                  ),
+                  FutureBuilder(
+                    future: sneakers,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.active) {
+                        print('active');
+                        return const CircularProgressIndicator();
+                      } else if (snapshot.connectionState ==
+                          ConnectionState.waiting) {
+                        print('waiting');
+                        return const CircularProgressIndicator();
+                      } else if (snapshot.connectionState ==
+                          ConnectionState.none) {
+                        print('none');
+                        return const CircularProgressIndicator();
+                      } else {
+                        if (snapshot.hasError) {
+                          return MyText('Error: ${snapshot.error}');
+                        } else {
+                          print('->> ${snapshot.data}');
+                          return SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              children: [
+                                const SizedBox(width: 15),
+                                if (snapshot.data != null)
+                                  for (int i = 0;
+                                      i < snapshot.data!.length;
+                                      i++)
+                                    SneakerTile(sneaker: snapshot.data![i])
+                              ],
+                            ),
+                          );
+                        }
+                      }
+                    },
+                  )
                 ],
               ),
             ),

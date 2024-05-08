@@ -7,10 +7,11 @@ import 'package:kickflip/screens/sellers/models.dart';
 class ListingWidget extends StatelessWidget {
   const ListingWidget({super.key, required this.product, required this.user});
   final KFUser user;
-  final SellerProductListItem product;
+  final KFProduct product;
 
   @override
   Widget build(BuildContext context) {
+    print('Product deets ======> ${product.status}');
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -61,7 +62,7 @@ class ListingWidget extends StatelessWidget {
                     children: [
                       Expanded(
                         child: MyText(
-                          product.name,
+                          'product.name',
                           size: 13,
                           weight: FontWeight.bold,
                           spacing: 1.5,

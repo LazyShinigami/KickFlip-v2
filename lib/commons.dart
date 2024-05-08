@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kickflip/constants.dart';
 import 'package:kickflip/models.dart';
+import 'package:kickflip/screens/buyers/productDetailPage.dart';
 
 class MyText extends StatelessWidget {
   String content;
@@ -115,69 +116,70 @@ class MyTextField extends StatelessWidget {
 class SneakerTile extends StatelessWidget {
   SneakerTile({super.key, required this.sneaker});
 
-  Sneakers sneaker;
-
-  // Sneakers(
-  //   pID: 12335324,
-  //   title: 'Jordan 1 Retro Low 85',
-  //   desc: 'Jordan 1 Retro Low 85 shoeeeesss',
-  //   status: 'listed',
-  //   imgURL: ['Jordan 1 Retro Low 85.webp'],
-  //   sellingPrice: 12,
-  //   sID: 32124,
-  // )
+  KFProduct sneaker;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 272.5,
-      constraints: const BoxConstraints(maxWidth: 272.5, minHeight: 300),
-      margin: const EdgeInsets.fromLTRB(0, 0, 25, 20),
-      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-      decoration: BoxDecoration(
-        // border: Border.all(width: 1, color: Colors.grey),
-        borderRadius: BorderRadius.circular(10),
-        color: Colors.white,
-        boxShadow: const [
-          BoxShadow(
-            color: Color.fromARGB(106, 158, 158, 158),
-            offset: Offset(10, 10),
-            blurRadius: 7.5,
-            spreadRadius: 2.5,
+    return GestureDetector(
+      onTap: () {
+        print(sneaker.pID);
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ProductDetailPage(sneaker: sneaker),
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // image
-          Container(
-            height: 200, width: 272.5 - 32,
-            // child: Image.asset(sneaker.imgURL[0]),
-            child: Placeholder(),
-          ),
-          const SizedBox(height: 10),
+        );
+      },
+      child: Container(
+        width: 272.5,
+        constraints: const BoxConstraints(maxWidth: 272.5, minHeight: 300),
+        margin: const EdgeInsets.fromLTRB(0, 0, 25, 20),
+        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+        decoration: BoxDecoration(
+          // border: Border.all(width: 1, color: Colors.grey),
+          borderRadius: BorderRadius.circular(10),
+          color: Colors.white,
+          boxShadow: const [
+            BoxShadow(
+              color: Color.fromARGB(106, 158, 158, 158),
+              offset: Offset(10, 10),
+              blurRadius: 7.5,
+              spreadRadius: 2.5,
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // image
+            Container(
+              height: 200, width: 272.5 - 32,
+              // child: Image.asset(sneaker.imgURL[0]),
+              child: Placeholder(),
+            ),
+            const SizedBox(height: 10),
 
-          // title
-          MyText(
-            sneaker.title,
-            size: 11,
-            weight: FontWeight.bold,
-            spacing: 0.25,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: 3.5),
+            // title
+            MyText(
+              sneaker.name,
+              size: 11,
+              weight: FontWeight.bold,
+              spacing: 0.25,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 3.5),
 
-          // desc
-          MyText(
-            sneaker.desc,
-            size: 11,
-            spacing: 0.1,
-            maxLines: 2,
-            color: const Color.fromARGB(255, 111, 111, 111),
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
+            // desc
+            MyText(
+              sneaker.desc,
+              size: 11,
+              spacing: 0.1,
+              maxLines: 2,
+              color: const Color.fromARGB(255, 111, 111, 111),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -162,8 +162,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       var x = await AuthService().signInWithEmailAndPassword(
                           email: emailController.text.trim(),
                           password: pwdController.text);
-                      print('VALUE OF X -----> ${x.toString()}');
-                      if (x.runtimeType == String) {
+                      // print('VALUE OF X -----> ${x.toString()}');
+                      if (x.runtimeType == String && x.toString().isNotEmpty) {
                         errorMessage = x;
                       }
                     }

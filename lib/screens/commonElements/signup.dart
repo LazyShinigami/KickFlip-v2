@@ -181,7 +181,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         email: emailController.text,
                         password: pwdController.text,
                       );
-                      if (x.toString().isNotEmpty) {
+                      if (x.runtimeType == String && x.toString().isNotEmpty) {
                         errorMessage = x;
                       }
                     }

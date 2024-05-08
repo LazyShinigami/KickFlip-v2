@@ -203,6 +203,12 @@ class ProfilePage extends StatelessWidget {
                       onTap: () async {
                         print("Logout functionality called");
                         await AuthService().logout();
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => AuthPageHandler(),
+                          ),
+                        );
                       },
                       child: Row(
                         children: [

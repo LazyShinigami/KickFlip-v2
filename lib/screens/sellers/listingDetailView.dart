@@ -8,7 +8,7 @@ import 'package:kickflip/screens/sellers/models.dart';
 
 class ListingDetailView extends StatefulWidget {
   ListingDetailView({super.key, required this.product, required this.user});
-  final SellerProductListItem product;
+  final KFProduct product;
   final KFUser user;
   @override
   State<ListingDetailView> createState() =>
@@ -18,7 +18,7 @@ class ListingDetailView extends StatefulWidget {
 class _ListingDetailViewState extends State<ListingDetailView> {
   _ListingDetailViewState(this.product, this.user);
   KFUser user;
-  SellerProductListItem product;
+  KFProduct product;
   final int _currentIndex = 0;
   late List<BidItem> bids = [];
 
