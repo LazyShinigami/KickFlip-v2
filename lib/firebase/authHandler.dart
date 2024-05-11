@@ -19,34 +19,35 @@ class AuthService {
   }
 
   // MyUser stream - used directly in root file
-  Stream<KFUser> get userStream async* {
+  Stream<User?> get userStream {
     var result = _auth.authStateChanges();
+    print('RESULT IN FIREBASE FUNC: ${result.first}');
+    return result;
 
-    await for (var user in result) {
-      if (user != null) {
-        // Wait for getOtherUserDetails() to complete before continuing
-        Map deets = await getOtherUserDetails(user.email!);
-        // print(deets);
-        yield KFUser(
-          email: user.email!,
-          type: deets['type'],
-          name: deets['name'],
-          uID: deets['uID'],
-        );
-      }
-    }
+    // await for (var user in result) {
+    //   if (user != null) {
+    //     // Wait for getOtherUserDetails() to complete before continuing
+    //     Map deets = await getOtherUserDetails(user.email!);
+    //     // print(deets);
+    //     yield KFUser(
+    //       email: user.email!,
+    //       type: deets['type'],
+    //       name: deets['name'],
+    //       uID: deets['uID'],
+    //     );
+    //   }
+    // }
   }
 
   // Auxiliary function to fetch all of a user's details from firestore
-  getOtherUserDetails(String email) async {
+  Future<KFUser> getUserDetails(String email) async {
     var x = await _store.doc(email).get();
-
-    return {
-      'type': x.data()!['type'],
-      'email': x.data()!['email'],
-      'name': x.data()!['name'],
-      'uID': x.data()!['uID'],
-    };
+    KFUser user = KFUser(
+        uID: x.data()!['uID'],
+        name: x.data()!['name'],
+        email: email,
+        type: x.data()!['type']);
+    return user;
   }
 
   // create acc - email, pwd, name, type

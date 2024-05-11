@@ -9,7 +9,6 @@ import 'package:kickflip/screens/commonElements/bottomNavBar.dart';
 import 'package:kickflip/screens/sellers/addListingPage.dart';
 import 'package:kickflip/screens/sellers/allListingsPage.dart';
 import 'package:kickflip/screens/sellers/listingWidget.dart';
-import 'package:kickflip/screens/sellers/models.dart';
 
 class SellerHomepage extends StatefulWidget {
   SellerHomepage({super.key, required this.user});
@@ -18,6 +17,57 @@ class SellerHomepage extends StatefulWidget {
   @override
   State<SellerHomepage> createState() => _SellerHomepageState();
 }
+
+// class _SellerHomepageState extends State<SellerHomepage> {
+//   final int _currentIndex = 0;
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: KickFlipAppBar(),
+//       body: SingleChildScrollView(
+//         child: Column(
+//           children: [
+//             // Dashboard
+//             FutureBuilder(
+//               future: FirestoreService()
+//                   .getAllProductsByThisSeller(widget.user.uID),
+//               builder: (context, snapshot) {
+//                 if (snapshot.connectionState == ConnectionState.waiting) {
+//                   return Container(
+//                     height: 200,
+//                     child: Center(
+//                       child: CircularProgressIndicator(
+//                           color: Colors.black, strokeWidth: 2),
+//                     ),
+//                   );
+//                 } else if (snapshot.connectionState == ConnectionState.done) {
+//                   if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+//                     return Dashboard(productsList: snapshot.data!);
+//                   } else if (snapshot.hasError) {
+//                     return Center(child: MyText('Error:: ${snapshot.error}'));
+//                   } else {
+//                     return Center(child: MyText('Nothing to see here...'));
+//                   }
+//                 } else {
+//                   return Center(child: MyText('Loading...'));
+//                 }
+//               },
+//             )
+
+//             // Add Listing
+
+//             // Manage Listings
+//           ],
+//         ),
+//       ),
+//       bottomNavigationBar: CustomBottomNavigationBar(
+//           selectedIndex: _currentIndex,
+//           accountType: 'seller',
+//           user: widget.user),
+//     );
+//   }
+// }
 
 class _SellerHomepageState extends State<SellerHomepage> {
   final int _currentIndex = 0;
@@ -165,11 +215,49 @@ class _SellerHomepageState extends State<SellerHomepage> {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     // While the data is loading, you can show a loading indicator
                     return const CircularProgressIndicator(color: Colors.black);
-                  } else if (snapshot.hasError) {
-                    // If there's an error, you can handle it here
-                    return Text('Error: ${snapshot.error}');
-                  } else {
-                    return Dashboard(productsList: snapshot.data!);
+                  }
+                  // else if (snapshot.hasError) {
+                  //   // If there's an error, you can handle it here
+                  //   return Text('Error---: ${snapshot.error}');
+                  // }
+                  else {
+                    if (snapshot.data != null) {
+                      return Dashboard(productsList: snapshot.data!);
+                    } else {
+                      return Container(
+                        height: 150,
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 12.5, horizontal: 15),
+                        decoration: BoxDecoration(
+                          border: Border.all(width: 1, color: Colors.grey),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Column(
+                          children: [
+                            // Dashboard title
+                            Center(
+                              child: MyText(
+                                'Dashboard',
+                                weight: FontWeight.bold,
+                                size: 18,
+                                spacing: 2,
+                              ),
+                            ),
+                            const Divider(
+                                height: 20, endIndent: 20, indent: 20),
+
+                            // Nothing to see here yet message
+                            Expanded(
+                              child: Container(
+                                child: Center(
+                                  child: MyText('Nothing to see here yet!'),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }
                   }
                 },
               ),
@@ -236,6 +324,9 @@ class _SellerHomepageState extends State<SellerHomepage> {
                   } else {
                     return ManageListingsWidget(
                         user: widget.user, productsList: snapshot.data!);
+                    // return Center(
+                    //   child: MyText('${snapshot.data}'),
+                    // );
                   }
                 },
               ),
@@ -262,7 +353,7 @@ class ManageListingsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print(productsList[0].sID);
+    print('-PRODUCT LIST- $productsList');
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
       decoration: BoxDecoration(
@@ -279,7 +370,14 @@ class ManageListingsWidget extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           if (productsList.isEmpty)
-            MyText('No items listed yet')
+            Center(
+              child: MyText(
+                'No items listed yet',
+                color: Colors.grey,
+                size: 13,
+                spacing: 1,
+              ),
+            )
           else
             for (int i = 0; i < productsList.length; i++)
               if (productsList[i].status == 'listed')
@@ -288,33 +386,34 @@ class ManageListingsWidget extends StatelessWidget {
                   user: user,
                 ),
           const Divider(height: 30),
-          GestureDetector(
-            onTap: () {
-              print('See all listings button clicked');
-              Navigator.pushAndRemoveUntil(context,
-                  MaterialPageRoute(builder: (context) {
-                return SellerAllListingsPage(user: user);
-              }), (route) => false);
-            },
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Expanded(
-                  child: Container(
-                    decoration: const BoxDecoration(),
-                    child: Center(
-                      child: MyText(
-                        'See all listings  →',
-                        color: const Color(0xFF5E5E5E),
-                        size: 12,
-                        spacing: 2,
+          if (productsList.isNotEmpty)
+            GestureDetector(
+              onTap: () {
+                print('See all listings button clicked');
+                Navigator.pushAndRemoveUntil(context,
+                    MaterialPageRoute(builder: (context) {
+                  return SellerAllListingsPage(user: user);
+                }), (route) => false);
+              },
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: Container(
+                      decoration: const BoxDecoration(),
+                      child: Center(
+                        child: MyText(
+                          'See all listings  →',
+                          color: const Color(0xFF5E5E5E),
+                          size: 12,
+                          spacing: 2,
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
         ],
       ),
     );

@@ -5,7 +5,6 @@ import 'package:kickflip/models.dart';
 import 'package:kickflip/screens/commonElements/appbar.dart';
 import 'package:kickflip/screens/commonElements/bottomNavBar.dart';
 import 'package:kickflip/screens/sellers/listingWidget.dart';
-import 'package:kickflip/screens/sellers/models.dart';
 
 class SellerAllListingsPage extends StatefulWidget {
   const SellerAllListingsPage({super.key, required this.user});
@@ -163,11 +162,25 @@ class _SellerAllListingsPageState extends State<SellerAllListingsPage> {
                     return Text(
                         'Error: ${snapshot.error}\nPlease try restarting the app!');
                   } else {
-                    for (int i = 0; i < snapshot.data!.length; i++)
-                      return ListingWidget(
-                          product: snapshot.data![i], user: widget.user);
-                    return Container(
-                        color: Colors.grey, height: 150, width: 150);
+                    if (snapshot.data!.isEmpty) {
+                      return Center(
+                        child: MyText('Nothing to see here yet...'),
+                      );
+                    } else {
+                      return SingleChildScrollView(
+                        child: Column(
+                          children: [
+                            // snapshot.data!.forEach((kfProduct) =>
+                            // ListingWidget(product: kfProduct, user: widget.user)),
+                          ],
+                        ),
+                      );
+
+                      // return ListingWidget(
+                      //     product: snapshot.data![i], user: widget.user);
+                      // return  ListingWidget(
+                      //       product: snapshot.data![i], user: widget.user);
+                    }
                   }
                 },
               ),

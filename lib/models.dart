@@ -80,6 +80,7 @@ class KFProduct {
     required this.shoeSize,
     required this.thumbnailImg,
     required this.otherImgs,
+    required this.category,
     this.saleDate,
     this.salePrice,
     this.bidders,
@@ -92,7 +93,15 @@ class KFProduct {
   bool? inTransit;
   int pID, sID, costPrice, shoeSize;
   List otherImgs;
-  String name, desc, status, brand, color, gender, thumbnailImg, receiptImg;
+  String name,
+      desc,
+      category,
+      status,
+      brand,
+      color,
+      gender,
+      thumbnailImg,
+      receiptImg;
 
   int? bID, salePrice;
   String? saleDate, listedDate, buyerName;

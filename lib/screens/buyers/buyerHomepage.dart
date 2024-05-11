@@ -19,16 +19,17 @@ class _BuyerHomepageState extends State<BuyerHomepage> {
   _BuyerHomepageState(this.user);
   final KFUser user;
   final _searchController = TextEditingController();
-  late Future<List<KFProduct>> sneakers;
+  // late Future<List<KFProduct>> sneakers;
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    sneakers = FirestoreService().getAllProducts();
+    // sneakers = FirestoreService().getAllProducts();
   }
 
   // bottom nav bar settings
   final int _selectedIndex = 0;
+  String gender = 'Unisex';
 
   @override
   Widget build(BuildContext context) {
@@ -37,78 +38,186 @@ class _BuyerHomepageState extends State<BuyerHomepage> {
 
       //
       body: Padding(
-        padding: const EdgeInsets.fromLTRB(10, 30, 10, 0),
-        child: Column(
-          children: [
-            // MySearchBar(),
-            Container(
-              // height: 350,
-              decoration: BoxDecoration(
-                color: ThemeColors().light,
-                // border: Border.all(width: 1, color: Colors.pink),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Box Title
-                  Row(
-                    children: [
-                      const SizedBox(width: 15),
-                      MyText(
-                        "Fresh Arrivals",
-                        weight: FontWeight.bold,
-                        color: const Color(0xEE181818),
-                        spacing: 1,
-                        wordSpacing: 5,
-                        size: 16,
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 15),
+        padding: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              // Fresh Arrivals Product Row
+              const SizedBox(height: 30),
+              Container(
+                // height: 350,
+                decoration: BoxDecoration(
+                  color: ThemeColors().light,
+                  // border: Border.all(width: 1, color: Colors.pink),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 15, horizontal: 0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Box Title
+                    Row(
+                      children: [
+                        const SizedBox(width: 15),
+                        MyText(
+                          "Fresh Arrivals",
+                          weight: FontWeight.bold,
+                          color: const Color(0xEE181818),
+                          spacing: 1,
+                          wordSpacing: 5,
+                          size: 16,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 15),
 
-                  // Product Row
-                  FutureBuilder(
-                    future: sneakers,
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.active) {
-                        print('active');
-                        return const CircularProgressIndicator();
-                      } else if (snapshot.connectionState ==
-                          ConnectionState.waiting) {
-                        print('waiting');
-                        return const CircularProgressIndicator();
-                      } else if (snapshot.connectionState ==
-                          ConnectionState.none) {
-                        print('none');
-                        return const CircularProgressIndicator();
-                      } else {
-                        if (snapshot.hasError) {
-                          return MyText('Error: ${snapshot.error}');
+                    // Fresh Arrivals Product Row
+                    FutureBuilder(
+                      future: FirestoreService().getAllProducts(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          print('waiting');
+                          return const CircularProgressIndicator();
                         } else {
-                          print('->> ${snapshot.data}');
-                          return SingleChildScrollView(
-                            scrollDirection: Axis.horizontal,
-                            child: Row(
-                              children: [
-                                const SizedBox(width: 15),
-                                if (snapshot.data != null)
-                                  for (int i = 0;
-                                      i < snapshot.data!.length;
-                                      i++)
-                                    SneakerTile(sneaker: snapshot.data![i])
-                              ],
-                            ),
-                          );
+                          if (snapshot.hasError) {
+                            return MyText('Error: ${snapshot.error}');
+                          } else {
+                            print('->> ${snapshot.data}');
+                            return SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                children: [
+                                  const SizedBox(width: 15),
+                                  if (snapshot.data != null)
+                                    for (int i = 0;
+                                        i < snapshot.data!.length;
+                                        i++)
+                                      SneakerTile(sneaker: snapshot.data![i])
+                                ],
+                              ),
+                            );
+                          }
                         }
-                      }
-                    },
-                  )
-                ],
+                      },
+                    ),
+                    // Shop by Gender Product Row
+
+                    // Shop by Category Product Row
+                  ],
+                ),
               ),
-            ),
-          ],
+
+              // Shop by gender product row
+              const SizedBox(height: 20),
+              Container(
+                // height: 350,
+                decoration: BoxDecoration(
+                  color: ThemeColors().light,
+                  // border: Border.all(width: 1, color: Colors.pink),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 15, horizontal: 0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Box Title
+                    Row(
+                      children: [
+                        const SizedBox(width: 15),
+                        MyText(
+                          "Shop by Gender",
+                          weight: FontWeight.bold,
+                          color: const Color(0xEE181818),
+                          spacing: 1,
+                          wordSpacing: 5,
+                          size: 16,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 15),
+
+                    // Fresh Arrivals Product Row
+                    FutureBuilder(
+                      future: FirestoreService().getAllProductsByGender(gender),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          print('waiting');
+                          return const CircularProgressIndicator();
+                        } else {
+                          if (snapshot.hasError) {
+                            return MyText('Error: ${snapshot.error}');
+                          } else {
+                            print('->> ${snapshot.data}');
+                            return SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                children: [
+                                  const SizedBox(width: 15),
+                                  InkWell(
+                                    onTap: () {
+                                      if (gender == 'Men') {
+                                        gender = 'Women';
+                                      } else if (gender == 'Women') {
+                                        gender = 'Unisex';
+                                      } else if (gender == 'Unisex') {
+                                        gender = 'Men';
+                                      }
+                                      setState(() {});
+                                    },
+                                    child: Container(
+                                      height: 75,
+                                      width: 75,
+                                      decoration: BoxDecoration(
+                                        borderRadius:
+                                            BorderRadius.circular(600),
+                                        border: Border.all(
+                                            width: 4, color: Colors.black),
+                                      ),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          MyText(
+                                            (gender == 'Men')
+                                                ? '♂'
+                                                : (gender == 'Women')
+                                                    ? '♀'
+                                                    : '⚧',
+                                            size: 22,
+                                            color: Colors.black,
+                                          ),
+                                          Icon(Icons.arrow_right_rounded),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 15),
+                                  if (snapshot.data != null)
+                                    for (int i = 0;
+                                        i < snapshot.data!.length;
+                                        i++)
+                                      SneakerTile(sneaker: snapshot.data![i])
+                                ],
+                              ),
+                            );
+                          }
+                        }
+                      },
+                    ),
+                    // Shop by Gender Product Row
+
+                    // Shop by Category Product Row
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 30),
+            ],
+          ),
         ),
       ),
 

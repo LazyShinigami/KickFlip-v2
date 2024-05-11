@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kickflip/commons.dart';
-import 'package:kickflip/constants.dart';
 import 'package:kickflip/firebase/authHandler.dart';
-import 'package:kickflip/screens/buyers/buyerHomepage.dart';
-import 'package:lottie/lottie.dart';
+import 'package:kickflip/screens/commonElements/loadingScreen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key, required this.callback});
@@ -47,80 +45,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 MyText("Login", size: 22, spacing: 3, weight: FontWeight.bold),
                 const SizedBox(height: 20),
 
-                // Account type switch
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    // Buyer
-                    GestureDetector(
-                      onTap: () {
-                        accountType = "buyer";
-                        setState(() {});
-                        print(accountType);
-                      },
-                      child: Container(
-                        padding: const EdgeInsetsDirectional.symmetric(
-                            horizontal: 15, vertical: 3),
-                        decoration: BoxDecoration(
-                          border: Border.all(width: 0.5, color: Colors.grey),
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(5),
-                            bottomLeft: Radius.circular(5),
-                          ),
-                          image: (accountType == 'buyer')
-                              ? const DecorationImage(
-                                  image:
-                                      AssetImage('assets/graphics/op-03.jpeg'),
-                                  fit: BoxFit.cover,
-                                )
-                              : null,
-                        ),
-                        child: MyText(
-                          'Buyer',
-                          size: 14,
-                          color: (accountType == 'buyer')
-                              ? Colors.white
-                              : Colors.black,
-                        ),
-                      ),
-                    ),
-
-                    // Seller
-                    GestureDetector(
-                      onTap: () {
-                        accountType = "seller";
-                        setState(() {});
-                        print(accountType);
-                      },
-                      child: Container(
-                        padding: const EdgeInsetsDirectional.symmetric(
-                            horizontal: 15, vertical: 3),
-                        decoration: BoxDecoration(
-                          border: Border.all(width: 0.5, color: Colors.grey),
-                          borderRadius: const BorderRadius.only(
-                            topRight: Radius.circular(5),
-                            bottomRight: Radius.circular(5),
-                          ),
-                          image: (accountType == 'seller')
-                              ? const DecorationImage(
-                                  image:
-                                      AssetImage('assets/graphics/op-03.jpeg'),
-                                  fit: BoxFit.cover,
-                                )
-                              : null,
-                        ),
-                        child: MyText(
-                          'Seller',
-                          size: 14,
-                          color: (accountType == 'seller')
-                              ? Colors.white
-                              : Colors.black,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-
                 // Error Message
                 if (errorMessage.isNotEmpty)
                   Container(
@@ -160,19 +84,17 @@ class _LoginScreenState extends State<LoginScreen> {
                       setState(() {});
                     } else {
                       var x = await AuthService().signInWithEmailAndPassword(
-                          email: emailController.text.trim(),
-                          password: pwdController.text);
+                        email: emailController.text.trim(),
+                        password: pwdController.text,
+                      );
+                      print(x);
                       // print('VALUE OF X -----> ${x.toString()}');
-                      if (x.runtimeType == String && x.toString().isNotEmpty) {
-                        errorMessage = x;
-                      }
+                      Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => LoadingScreen(user: x)),
+                          (route) => false);
                     }
-                    // Navigator.pushAndRemoveUntil(
-                    //     context,
-                    //     MaterialPageRoute(
-                    //       builder: (context) => const BuyerHomepage(uID: 5678),
-                    //     ),
-                    //     (route) => false);
                   },
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10),

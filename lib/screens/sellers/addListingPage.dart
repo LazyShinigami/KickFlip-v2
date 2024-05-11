@@ -26,9 +26,15 @@ class _AddListingPageState extends State<AddListingPage> {
 
   final _pBrandController = TextEditingController();
 
-  final _pImages = [];
+  final _pCategoryController = TextEditingController();
 
-  File? _tempThumbnail;
+  final _pCostPriceController = TextEditingController();
+
+  String gender = 'Unisex';
+
+  List<File?> _pImages = [];
+
+  File? _thumbnail;
 
   File? _receipt;
 
@@ -58,14 +64,14 @@ class _AddListingPageState extends State<AddListingPage> {
               pickerColor: Colors.white,
               availableColors: Shaders().colorShades.keys.toList(),
               onColorChanged: (Color color) {
-                print(_selectedColor);
+                // print(_selectedColor);
                 setState(
                   () {
-                    print(_selectedColorName.isEmpty);
+                    // print(_selectedColorName.isEmpty);
                     _selectedColor = color;
                     _selectedColorName = Shaders().colorShades[color]!;
-                    print(_selectedColorName);
-                    print(_selectedColorName.isEmpty);
+                    // print(_selectedColorName);
+                    // print(_selectedColorName.isEmpty);
                     Navigator.of(context).pop();
                   },
                 );
@@ -160,6 +166,54 @@ class _AddListingPageState extends State<AddListingPage> {
                 hint: 'Name of the brand',
               ),
 
+              // Category
+              const SizedBox(height: 10),
+              MyTextField(
+                controller: _pCategoryController,
+                label: 'Category',
+                hint: 'What kind of shoes are these?',
+              ),
+
+              // Gender
+              const SizedBox(height: 10),
+              Container(
+                padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
+                height: 70,
+                decoration: BoxDecoration(
+                  color: ThemeColors().light,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Center(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      MyText(
+                        'Gender',
+                        size: 13,
+                        spacing: 2,
+                      ),
+                      DropdownButton<String>(
+                        items: <String>['Unisex', 'Men', 'Women']
+                            .map((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value.toString(),
+                            child: MyText(value.toString(), size: 13),
+                          );
+                        }).toList(),
+                        onChanged: (String? newValue) {
+                          // Do something when the dropdown value changes
+                          gender = newValue!;
+                          setState(() {});
+                        },
+                        hint: MyText('$gender', size: 13),
+                        underline: const SizedBox(), // Hide the underline
+                        icon: const Icon(Icons.arrow_drop_down_rounded),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
               // Shoe Size
               const SizedBox(height: 10),
               Container(
@@ -189,7 +243,6 @@ class _AddListingPageState extends State<AddListingPage> {
                         onChanged: (String? newValue) {
                           // Do something when the dropdown value changes
                           shoeSize = int.parse(newValue!);
-                          print('Newly chosen size: $shoeSize');
                           setState(() {});
                         },
                         hint: MyText('$shoeSize', size: 13),
@@ -250,6 +303,14 @@ class _AddListingPageState extends State<AddListingPage> {
                 ),
               ),
 
+              // Category
+              const SizedBox(height: 10),
+              MyTextField(
+                controller: _pCostPriceController,
+                label: 'Cost Price (number)',
+                hint: 'How much did you get these for?',
+              ),
+
               // Thumbnail
               const SizedBox(height: 10),
               Container(
@@ -266,7 +327,7 @@ class _AddListingPageState extends State<AddListingPage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        imagePickerTileBuilder(),
+                        imagePickerTileBuilder('thumbnail'),
                       ],
                     ),
                   ],
@@ -286,10 +347,68 @@ class _AddListingPageState extends State<AddListingPage> {
                   children: [
                     MyText('Choose 5 more images', size: 13, spacing: 2),
                     const SizedBox(height: 20),
+                    Container(
+                      height: 275,
+                      child: GridView.count(
+                        crossAxisSpacing: 15,
+                        mainAxisSpacing: 15,
+                        physics: NeverScrollableScrollPhysics(),
+                        crossAxisCount: 3,
+                        children: [
+                          for (int i = 0; i < 5; i++)
+                            GestureDetector(
+                              onTap: () {
+                                buildPickImagePopup('otherImgs');
+                              },
+                              child: (_pImages.isEmpty)
+                                  ? Container(
+                                      color: const Color.fromARGB(
+                                          53, 158, 158, 158),
+                                      child: const Icon(
+                                        Icons.add_rounded,
+                                        size: 35,
+                                        color: Color(0xFF7C7C7C),
+                                      ),
+                                    )
+                                  : (i < _pImages.length)
+                                      ? Image.file(
+                                          _pImages[i]!.absolute,
+                                          fit: BoxFit.cover,
+                                        )
+                                      : Container(
+                                          color: const Color.fromARGB(
+                                              53, 158, 158, 158),
+                                          child: const Icon(
+                                            Icons.add_rounded,
+                                            size: 35,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Receipt
+              const SizedBox(height: 10),
+              Container(
+                padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  color: ThemeColors().light,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    MyText('Upload receipt', size: 13, spacing: 2),
+                    const SizedBox(height: 20),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        imagePickerTileBuilder(),
+                        imagePickerTileBuilder('receipt'),
                       ],
                     ),
                   ],
@@ -309,48 +428,158 @@ class _AddListingPageState extends State<AddListingPage> {
     );
   }
 
-  Widget imagePickerTileBuilder() {
+  imagePickerFunction(String type, ImageSource source) async {
+    if (type == 'thumbnail' || type == 'receipt') {
+      var x = await ImagePicker()
+          .pickImage(source: source, requestFullMetadata: false);
+      if (x != null) {
+        File temp = File(x.path);
+        // // print(temp.path);
+        if (type == 'thumbnail') {
+          _thumbnail = temp;
+        } else {
+          _receipt = temp;
+        }
+      } else {
+        print('No file chosen!');
+      }
+    } else {
+      if (source == ImageSource.gallery) {
+        var x = await ImagePicker().pickMultiImage(requestFullMetadata: false);
+        if (x.isNotEmpty) {
+          for (var i = 0; i < x.length; i++) {
+            File temp = File(x[i].path);
+            _pImages.add(temp);
+          }
+        } else {
+          print('No file chosen!');
+        }
+      } else {
+        var x = await ImagePicker().pickImage(source: source);
+        if (x != null) {
+          File temp = File(x.path);
+          _pImages.add(temp);
+        } else {
+          print('No file chosen!');
+        }
+      }
+    }
+  }
+
+  Widget imagePickerTileBuilder(String type) {
     return GestureDetector(
+      key: UniqueKey(),
       onTap: () {
-        showDialog(
-          context: context,
-          builder: (context) {
-            return Center(
-              child: AlertDialog(
-                title: MyText('Pick an image'),
-                actions: [
-                  Row(
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          // getImageGallery(type: 'camera');
-                        },
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            );
-          },
-        );
+        buildPickImagePopup(type);
       },
       child: Container(
         color: const Color.fromARGB(53, 158, 158, 158),
         child: SizedBox(
           height: 150,
           width: 150,
-          // child: (_tempThumbnail != null)
-          //     ? Image.file(
-          //         _tempThumbnail!.absolute,
-          //         fit: BoxFit.cover,
-          //       )
-          //     : const Icon(
-          //         Icons.add_rounded,
-          //         size: 35,
-          //         color: Color(0xFF7C7C7C),
-          //       ),
+          child: (type == 'thumbnail' && _thumbnail != null)
+              ? Image.file(
+                  _thumbnail!.absolute,
+                  fit: BoxFit.cover,
+                )
+              : (type == 'receipt' && _receipt != null)
+                  ? Image.file(
+                      _receipt!.absolute,
+                      fit: BoxFit.cover,
+                    )
+                  : const Icon(
+                      Icons.add_rounded,
+                      size: 35,
+                      color: Color(0xFF7C7C7C),
+                    ),
         ),
       ),
+    );
+  }
+
+  Future<dynamic> buildPickImagePopup(String type) {
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return Center(
+          child: AlertDialog(
+            title: MyText('Pick an image'),
+            actions: [
+              // Camera Option
+              GestureDetector(
+                onTap: () async {
+                  // print('camera option chosen');
+                  await imagePickerFunction(type, ImageSource.camera);
+                  Navigator.pop(context);
+                  setState(() {});
+                  // print(_thumbnail);
+                },
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  width: 120,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    image: DecorationImage(
+                      image: AssetImage('assets/graphics/op-02.jpeg'),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.camera_alt_rounded, color: Colors.white),
+                      MyText(
+                        '  Camera',
+                        size: 14,
+                        spacing: 1,
+                        color: Colors.white,
+                        weight: FontWeight.bold,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              // Gallery Option
+              GestureDetector(
+                onTap: () async {
+                  // print('gallery option chosen');
+                  await imagePickerFunction(type, ImageSource.gallery);
+                  // // print('-------------> $_thumbnail');
+                  Navigator.pop(context);
+                  setState(() {});
+                },
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  width: 120,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    image: DecorationImage(
+                      image: AssetImage('assets/graphics/op-02.jpeg'),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.photo_rounded, color: Colors.white),
+                      MyText(
+                        '  Gallery',
+                        size: 14,
+                        spacing: 1,
+                        color: Colors.white,
+                        weight: FontWeight.bold,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
