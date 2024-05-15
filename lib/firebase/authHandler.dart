@@ -23,31 +23,26 @@ class AuthService {
     var result = _auth.authStateChanges();
     print('RESULT IN FIREBASE FUNC: ${result.first}');
     return result;
-
-    // await for (var user in result) {
-    //   if (user != null) {
-    //     // Wait for getOtherUserDetails() to complete before continuing
-    //     Map deets = await getOtherUserDetails(user.email!);
-    //     // print(deets);
-    //     yield KFUser(
-    //       email: user.email!,
-    //       type: deets['type'],
-    //       name: deets['name'],
-    //       uID: deets['uID'],
-    //     );
-    //   }
-    // }
   }
 
   // Auxiliary function to fetch all of a user's details from firestore
-  Future<KFUser> getUserDetails(String email) async {
-    var x = await _store.doc(email).get();
-    KFUser user = KFUser(
-        uID: x.data()!['uID'],
-        name: x.data()!['name'],
-        email: email,
-        type: x.data()!['type']);
-    return user;
+  Future getUserDetails(String email) async {
+    try {
+      var x = await _store.doc(email).get();
+      print('READ THIS===========================================\n$x\n');
+      KFUser user = KFUser(
+          uID: x.data()!['uID'],
+          name: x.data()!['name'],
+          email: email,
+          type: x.data()!['type'],
+          favs: x.data()!['favs']);
+
+      return user;
+    } on FirebaseAuthException catch (e) {
+      print(
+          'Error here --------------------------------------------------------------------------------->\n$e\n');
+      return e.message;
+    }
   }
 
   // create acc - email, pwd, name, type
@@ -65,8 +60,10 @@ class AuthService {
         'pwd': password,
         'email': email,
         'type': type,
+        'favs': [],
         'uID': generateUID(),
       });
+      await _auth.signInWithEmailAndPassword(email: email, password: password);
       return '';
     } on FirebaseAuthException catch (e) {
       return e.message.toString();

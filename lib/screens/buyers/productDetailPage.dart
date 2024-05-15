@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:kickflip/commons.dart';
 import 'package:kickflip/models.dart';
+import 'package:kickflip/screens/buyers/paymentOptions.dart';
 import 'package:kickflip/screens/commonElements/appbar.dart';
 
 class ProductDetailPage extends StatefulWidget {
-  const ProductDetailPage({super.key, required this.sneaker});
+  const ProductDetailPage(
+      {super.key, required this.sneaker, required this.user});
   final KFProduct sneaker;
+  final KFUser user;
 
   @override
   State<ProductDetailPage> createState() => _ProductDetailPageState();
@@ -13,12 +16,19 @@ class ProductDetailPage extends StatefulWidget {
 
 class _ProductDetailPageState extends State<ProductDetailPage> {
   final TextEditingController controller = TextEditingController();
+  int currentImageIndex = 0;
+  late List<String> allImages = [];
 
   @override
   void initState() {
     // TODO: fetch it from the servers
     super.initState();
     controller.text = '0';
+    super.initState();
+    allImages = [widget.sneaker.thumbnailImage];
+    widget.sneaker.otherImages.forEach((imgUrl) {
+      allImages.add(imgUrl);
+    });
   }
 
   @override
@@ -34,12 +44,79 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Image Carousel
+              const SizedBox(height: 20),
+              // Image
               Container(
-                height: height * 0.35,
-                decoration: BoxDecoration(
-                  color: const Color.fromARGB(67, 158, 158, 158),
-                  border: Border.all(width: 1, color: Colors.grey),
+                color: Colors.grey,
+                height: 300,
+                child: PageView.builder(
+                  onPageChanged: (value) {
+                    currentImageIndex = value;
+                    setState(() {});
+                  },
+                  itemCount: 6,
+                  itemBuilder: (context, index) {
+                    currentImageIndex = index;
+                    return Image.network(
+                      allImages[index],
+                      fit: BoxFit.cover,
+                      loadingBuilder: (BuildContext context, Widget child,
+                          ImageChunkEvent? loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return Transform.scale(
+                          scaleX: 0.5,
+                          scaleY: 0.35,
+                          child: Container(
+                            height: 50,
+                            width: 50,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.black,
+                              value: loadingProgress.expectedTotalBytes != null
+                                  ? loadingProgress.cumulativeBytesLoaded /
+                                      loadingProgress.expectedTotalBytes!
+                                  : null,
+                            ),
+                          ),
+                        );
+                      },
+                      errorBuilder: (context, error, stackTrace) {
+                        return Text('Error loading image');
+                      },
+                    );
+                  },
+                ),
+              ),
+
+              // Image Progress Indicator
+              const SizedBox(height: 5),
+              Center(
+                child: Container(
+                  key: UniqueKey(),
+                  height: 12.5,
+                  width: 150,
+                  decoration: BoxDecoration(
+                    color: Color(0x2A000000),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      const SizedBox(width: 10),
+                      for (int i = 0; i < 6; i++)
+                        Container(
+                          height: (currentImageIndex == i) ? 8 : 6,
+                          width: (currentImageIndex == i) ? 8 : 6,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(50),
+                            color: (currentImageIndex == i)
+                                ? Color.fromARGB(61, 0, 0, 0)
+                                : Colors.white,
+                          ),
+                        ),
+                      const SizedBox(width: 10),
+                    ],
+                  ),
                 ),
               ),
 
@@ -90,7 +167,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
               const Divider(color: Colors.grey, thickness: 0.75),
               const SizedBox(height: 10),
               MyText(
-                'Sold by:  ${widget.sneaker.sID}',
+                'Sold by:  ${widget.sneaker.sellerName}',
                 size: 14,
                 color: const Color.fromARGB(255, 86, 86, 86),
               ),
@@ -338,30 +415,40 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                 // Navigator.of(context).pop();
 
                 Navigator.pop(context);
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      title: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          MyText('Bidding...'),
-                        ],
-                      ),
-                      content: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 60, vertical: 60),
-                        height: 230,
-                        width: 100,
-                        child: const CircularProgressIndicator(
-                            color: Colors.black, strokeWidth: 5),
-                      ),
-                    );
-                  },
+                // showDialog(
+                //   context: context,
+                //   builder: (BuildContext context) {
+                //     return AlertDialog(
+                //       title: Row(
+                //         mainAxisAlignment: MainAxisAlignment.center,
+                //         children: [
+                //           MyText('Bidding...'),
+                //         ],
+                //       ),
+                //       content: Container(
+                //         padding: const EdgeInsets.symmetric(
+                //             horizontal: 60, vertical: 60),
+                //         height: 230,
+                //         width: 100,
+                //         child: const CircularProgressIndicator(
+                //             color: Colors.black, strokeWidth: 5),
+                //       ),
+                //     );
+                //   },
+                // );
+                // Future.delayed(const Duration(seconds: 3), () {
+                //   Navigator.pop(context);
+                // });
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MyPaymentsOptionPage(
+                      user: widget.user,
+                      amount: double.parse('${controller.text}').toInt(),
+                      product: widget.sneaker,
+                    ),
+                  ),
                 );
-                Future.delayed(const Duration(seconds: 3), () {
-                  Navigator.pop(context);
-                });
               },
               child: Container(
                 decoration: BoxDecoration(

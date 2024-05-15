@@ -18,7 +18,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: FutureBuilder(
-        future: AuthService().getUserDetails(widget.user.user!.email!),
+        future: AuthService().getUserDetails(widget.user.user.email!),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(
@@ -33,6 +33,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
             );
           } else {
             if (snapshot.hasData) {
+              print('we have data ${snapshot.data}');
               KFUser myUser = snapshot.data!;
               if (myUser.type == 'seller') {
                 return SellerHomepage(user: myUser);

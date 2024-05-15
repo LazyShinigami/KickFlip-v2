@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kickflip/commons.dart';
-import 'package:kickflip/constants.dart';
 import 'package:kickflip/firebase/authHandler.dart';
-import 'package:kickflip/screens/buyers/buyerHomepage.dart';
+import 'package:kickflip/screens/commonElements/loadingScreen.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key, required this.callback});
@@ -170,7 +169,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 GestureDetector(
                   onTap: () async {
                     print("Submit button clicked");
-
                     SignUpValidator();
                     if (errorMessage.isNotEmpty) {
                       setState(() {});
@@ -178,21 +176,27 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       var x = await AuthService().signUpWithUserCredentials(
                         name: nameController.text,
                         type: accountType,
-                        email: emailController.text,
+                        email: emailController.text.trim(),
                         password: pwdController.text,
                       );
-                      if (x.runtimeType == String && x.toString().isNotEmpty) {
-                        errorMessage = x;
+                      if (x.runtimeType == String) {
+                        setState(() {});
+                      }
+                      print('LOOOK HEREEEE\n$x\n');
+                      // print('VALUE OF X -----> ${x.toString()}');
+                      if (x.isEmpty) {
+                        Center(
+                          child: MyText('Got some shit here: $x'),
+                        );
+                      } else {
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => LoadingScreen(user: x)),
+                          (route) => false,
+                        );
                       }
                     }
-                    setState(() {});
-
-                    // Navigator.pushAndRemoveUntil(
-                    //     context,
-                    //     MaterialPageRoute(
-                    //       builder: (context) => BuyerHomepage(uID: 5678),
-                    //     ),
-                    //     (route) => false);
                   },
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10),

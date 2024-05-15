@@ -114,9 +114,10 @@ class MyTextField extends StatelessWidget {
 }
 
 class SneakerTile extends StatelessWidget {
-  SneakerTile({super.key, required this.sneaker});
+  SneakerTile({super.key, required this.sneaker, required this.user});
 
   KFProduct sneaker;
+  KFUser user;
 
   @override
   Widget build(BuildContext context) {
@@ -126,7 +127,10 @@ class SneakerTile extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ProductDetailPage(sneaker: sneaker),
+            builder: (context) => ProductDetailPage(
+              sneaker: sneaker,
+              user: user,
+            ),
           ),
         );
       },
@@ -153,9 +157,14 @@ class SneakerTile extends StatelessWidget {
           children: [
             // image
             Container(
-              height: 200, width: 272.5 - 32,
-              // child: Image.asset(sneaker.imgURL[0]),
-              child: Placeholder(),
+              height: 185,
+              decoration: BoxDecoration(
+                // color: Colors.pink,
+                image: DecorationImage(
+                  image: NetworkImage(sneaker.thumbnailImage),
+                  fit: BoxFit.cover,
+                ),
+              ),
             ),
             const SizedBox(height: 10),
 
@@ -181,6 +190,28 @@ class SneakerTile extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class GetImage extends StatefulWidget {
+  const GetImage({super.key, required this.url});
+  final String url;
+
+  @override
+  State<GetImage> createState() => _GetImageState();
+}
+
+class _GetImageState extends State<GetImage> {
+  @override
+  Widget build(BuildContext context) {
+    return Image.network(
+      widget.url,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) {
+        print('Error while loading an image: $error');
+        return MyText('Error loading image');
+      },
     );
   }
 }

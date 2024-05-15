@@ -18,57 +18,6 @@ class SellerHomepage extends StatefulWidget {
   State<SellerHomepage> createState() => _SellerHomepageState();
 }
 
-// class _SellerHomepageState extends State<SellerHomepage> {
-//   final int _currentIndex = 0;
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: KickFlipAppBar(),
-//       body: SingleChildScrollView(
-//         child: Column(
-//           children: [
-//             // Dashboard
-//             FutureBuilder(
-//               future: FirestoreService()
-//                   .getAllProductsByThisSeller(widget.user.uID),
-//               builder: (context, snapshot) {
-//                 if (snapshot.connectionState == ConnectionState.waiting) {
-//                   return Container(
-//                     height: 200,
-//                     child: Center(
-//                       child: CircularProgressIndicator(
-//                           color: Colors.black, strokeWidth: 2),
-//                     ),
-//                   );
-//                 } else if (snapshot.connectionState == ConnectionState.done) {
-//                   if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-//                     return Dashboard(productsList: snapshot.data!);
-//                   } else if (snapshot.hasError) {
-//                     return Center(child: MyText('Error:: ${snapshot.error}'));
-//                   } else {
-//                     return Center(child: MyText('Nothing to see here...'));
-//                   }
-//                 } else {
-//                   return Center(child: MyText('Loading...'));
-//                 }
-//               },
-//             )
-
-//             // Add Listing
-
-//             // Manage Listings
-//           ],
-//         ),
-//       ),
-//       bottomNavigationBar: CustomBottomNavigationBar(
-//           selectedIndex: _currentIndex,
-//           accountType: 'seller',
-//           user: widget.user),
-//     );
-//   }
-// }
-
 class _SellerHomepageState extends State<SellerHomepage> {
   final int _currentIndex = 0;
 
@@ -215,13 +164,9 @@ class _SellerHomepageState extends State<SellerHomepage> {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     // While the data is loading, you can show a loading indicator
                     return const CircularProgressIndicator(color: Colors.black);
-                  }
-                  // else if (snapshot.hasError) {
-                  //   // If there's an error, you can handle it here
-                  //   return Text('Error---: ${snapshot.error}');
-                  // }
-                  else {
-                    if (snapshot.data != null) {
+                  } else if (snapshot.connectionState == ConnectionState.done) {
+                    if (snapshot.hasData && snapshot.data != null) {
+                      print('Snapshot has some data: ${snapshot.data}');
                       return Dashboard(productsList: snapshot.data!);
                     } else {
                       return Container(
@@ -250,7 +195,7 @@ class _SellerHomepageState extends State<SellerHomepage> {
                             Expanded(
                               child: Container(
                                 child: Center(
-                                  child: MyText('Nothing to see here yet!'),
+                                  child: MyText('${snapshot.error}'),
                                 ),
                               ),
                             ),
@@ -258,9 +203,15 @@ class _SellerHomepageState extends State<SellerHomepage> {
                         ),
                       );
                     }
+                  } else {
+                    return Center(
+                      child: MyText('outer else called'),
+                    );
                   }
                 },
               ),
+
+              // Add a product section
               const SizedBox(height: 35),
               Container(
                 padding:
@@ -353,7 +304,7 @@ class ManageListingsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print('-PRODUCT LIST- $productsList');
+    // print('-PRODUCT LIST- $productsList');
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
       decoration: BoxDecoration(
@@ -389,7 +340,6 @@ class ManageListingsWidget extends StatelessWidget {
           if (productsList.isNotEmpty)
             GestureDetector(
               onTap: () {
-                print('See all listings button clicked');
                 Navigator.pushAndRemoveUntil(context,
                     MaterialPageRoute(builder: (context) {
                   return SellerAllListingsPage(user: user);
@@ -426,6 +376,7 @@ class Dashboard extends StatelessWidget {
 
   List<int> countLST(List<KFProduct> productsList) {
     int L = 0, S = 0, T = 0;
+    int total = productsList.length;
     for (var product in productsList) {
       if (product.status == 'listed') {
         L++;
@@ -436,7 +387,7 @@ class Dashboard extends StatelessWidget {
       }
     }
 
-    List<int> countsLST = [L, S, T];
+    List<int> countsLST = [L, S, T, total];
 
     return countsLST;
   }
@@ -457,13 +408,13 @@ class Dashboard extends StatelessWidget {
   }
 
   int calcSale(List<KFProduct> productsList) {
-    int total = 0;
+    int totalSaleAmount = 0;
     for (var product in productsList) {
       if (product.salePrice != null) {
-        total += product.salePrice!;
+        totalSaleAmount += product.salePrice!;
       }
     }
-    return total;
+    return totalSaleAmount;
   }
 
   @override
@@ -546,14 +497,6 @@ class Dashboard extends StatelessWidget {
           child: PieChart(
             PieChartData(
               sections: [
-                // total products
-                PieChartSectionData(
-                  value: double.parse('${productsList.length}'),
-                  color: Colors.transparent,
-                  borderSide: const BorderSide(width: 1, color: Colors.grey),
-                  titleStyle: const TextStyle(color: Colors.transparent),
-                ),
-
                 // Product Count - Listed
                 PieChartSectionData(
                   value: double.parse('${countLST(productsList)[0]}'),
@@ -571,7 +514,8 @@ class Dashboard extends StatelessWidget {
                 // Product Count - To be verified
                 PieChartSectionData(
                   value: double.parse('${countLST(productsList)[2]}'),
-                  color: Colors.green,
+                  color: Color.fromARGB(164, 251, 255, 148),
+                  borderSide: const BorderSide(width: 1, color: Colors.grey),
                   titleStyle: const TextStyle(color: Colors.transparent),
                 ),
               ],
@@ -621,7 +565,7 @@ class Dashboard extends StatelessWidget {
             const Icon(
               Icons.square_rounded,
               size: 10,
-              color: Colors.green,
+              color: Color(0xFFFBFF94),
             ),
             MyText(
               ' ${countLST(productsList)[2]} products to be verified',

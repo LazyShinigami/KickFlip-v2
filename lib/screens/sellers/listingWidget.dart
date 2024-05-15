@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:kickflip/commons.dart';
 import 'package:kickflip/models.dart';
 import 'package:kickflip/screens/sellers/listingDetailView.dart';
-import 'package:kickflip/screens/sellers/models.dart';
 
 class ListingWidget extends StatelessWidget {
   const ListingWidget({super.key, required this.product, required this.user});
@@ -48,7 +47,7 @@ class ListingWidget extends StatelessWidget {
             Container(
               height: 75,
               width: 75,
-              color: Colors.grey,
+              child: GetImage(url: product.thumbnailImage),
             ),
             const SizedBox(width: 10),
 
@@ -62,7 +61,7 @@ class ListingWidget extends StatelessWidget {
                     children: [
                       Expanded(
                         child: MyText(
-                          'product.name',
+                          product.name,
                           size: 13,
                           weight: FontWeight.bold,
                           spacing: 1.5,

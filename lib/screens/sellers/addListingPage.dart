@@ -4,6 +4,7 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:kickflip/commons.dart';
 import 'package:kickflip/constants.dart';
+import 'package:kickflip/firebase/firestoreHandler.dart';
 import 'package:kickflip/models.dart';
 import 'package:kickflip/screens/commonElements/appbar.dart';
 import 'package:kickflip/screens/commonElements/bottomNavBar.dart';
@@ -18,6 +19,7 @@ class AddListingPage extends StatefulWidget {
 
 class _AddListingPageState extends State<AddListingPage> {
   final int _currentIndex = 1;
+  final ScrollController _scrollController = ScrollController();
 
   // Controllers
   final _pNameController = TextEditingController();
@@ -38,19 +40,37 @@ class _AddListingPageState extends State<AddListingPage> {
 
   File? _receipt;
 
+  int shoeSize = 4;
+
   Color _selectedColor = Colors.transparent;
+
   String _selectedColorName = '';
-  String validator(String brand, String size, String color,
-      String thumbnailImage, List moreImages, String receipt) {
-    if (brand.isEmpty ||
-        size.isEmpty ||
-        color.isEmpty ||
-        thumbnailImage.isEmpty ||
-        moreImages.isEmpty ||
-        receipt.isEmpty) {
-      return '';
+
+  String errorMessage = '';
+
+  String validator() {
+    if (_pNameController.text.trim().isEmpty ||
+        _pDescController.text.isEmpty ||
+        _pCategoryController.text.isEmpty ||
+        _pCostPriceController.text.isEmpty ||
+        _pBrandController.text.isEmpty ||
+        _selectedColorName.isEmpty ||
+        _thumbnail == null ||
+        _pImages.isEmpty ||
+        _receipt == null) {
+      return 'All fields are mandatory';
     }
-    return '';
+    if (_pImages.isNotEmpty && _pImages.length < 5) {
+      return 'Provide 5 images of the sneaker';
+    }
+
+    try {
+      int x = int.parse(_pCostPriceController.text.trim());
+      return '';
+    } catch (e) {
+      print(e);
+      return 'The cost price must be a number';
+    }
   }
 
   void openColorPicker() {
@@ -91,7 +111,21 @@ class _AddListingPageState extends State<AddListingPage> {
     );
   }
 
-  int shoeSize = 4;
+  void disposeControllers() {
+    _pNameController.clear();
+    _pBrandController.clear();
+    _pCategoryController.clear();
+    _pCostPriceController.clear();
+    _pDescController.clear();
+    gender = 'Unisex';
+    _pImages = [];
+    _thumbnail = null;
+    _receipt = null;
+    shoeSize = 4;
+    _selectedColor = Colors.transparent;
+    _selectedColorName = '';
+    errorMessage = '';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -100,6 +134,7 @@ class _AddListingPageState extends State<AddListingPage> {
       body: Padding(
         padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
         child: SingleChildScrollView(
+          controller: _scrollController,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -109,6 +144,19 @@ class _AddListingPageState extends State<AddListingPage> {
                 weight: FontWeight.bold,
                 spacing: 2,
               ),
+
+              // Error Message
+              if (errorMessage.isNotEmpty)
+                Container(
+                  margin: const EdgeInsets.symmetric(vertical: 10),
+                  child: MyText(
+                    errorMessage,
+                    color: Colors.red,
+                    size: 14,
+                    weight: FontWeight.bold,
+                    spacing: 1,
+                  ),
+                ),
 
               // Name
               const SizedBox(height: 20),
@@ -358,7 +406,7 @@ class _AddListingPageState extends State<AddListingPage> {
                           for (int i = 0; i < 5; i++)
                             GestureDetector(
                               onTap: () {
-                                buildPickImagePopup('otherImgs');
+                                buildPickImagePopup('otherImages');
                               },
                               child: (_pImages.isEmpty)
                                   ? Container(
@@ -413,6 +461,119 @@ class _AddListingPageState extends State<AddListingPage> {
                     ),
                   ],
                 ),
+              ),
+
+              // Submit Button
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () async {
+                        print('Post object for listing');
+                        errorMessage = validator();
+                        if (errorMessage.isNotEmpty) {
+                          setState(() {});
+                          _scrollController.animateTo(
+                            0.0,
+                            duration: Duration(milliseconds: 300),
+                            curve: Curves.easeInOut,
+                          );
+                        } else {
+                          FirestoreService().postProductForVerification(
+                            name: _pNameController.text.trim(),
+                            desc: _pDescController.text,
+                            brand: _pBrandController.text,
+                            category: _pCategoryController.text,
+                            gender: gender,
+                            shoeSize: shoeSize,
+                            shoeColor: _selectedColorName,
+                            costPrice:
+                                int.parse(_pCostPriceController.text.trim()),
+                            thumbnail: _thumbnail!,
+                            otherImages: _pImages,
+                            receipt: _receipt!,
+                            user: widget.user,
+                          );
+                          disposeControllers();
+                          setState(() {});
+                          return showDialog(
+                              context: context,
+                              builder: (context) {
+                                return AlertDialog(
+                                  title: MyText(
+                                    'Your product has been sent for verification',
+                                    color: Colors.green,
+                                    weight: FontWeight.bold,
+                                    size: 15,
+                                    spacing: 0.5,
+                                  ),
+                                  content: SingleChildScrollView(
+                                    child: Center(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          MyText(
+                                            'It might take a few mins to reflect changes',
+                                            size: 14,
+                                            spacing: 1,
+                                            color: Colors.blue,
+                                          ),
+                                          const SizedBox(height: 20),
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              MyText(
+                                                '✔',
+                                                color: Colors.black,
+                                                size: 100,
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  actions: [
+                                    GestureDetector(
+                                      onTap: () {
+                                        Navigator.pop(context);
+                                      },
+                                      child: MyText(
+                                        'Go Back',
+                                        spacing: 1,
+                                        weight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              });
+                        }
+                      },
+                      child: Container(
+                        height: 70,
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                            image: AssetImage('assets/graphics/op-02.jpeg'),
+                            fit: BoxFit.cover,
+                          ),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Center(
+                          child: MyText(
+                            'Send for Verification',
+                            color: Colors.white,
+                            weight: FontWeight.bold,
+                            spacing: 1,
+                            wordSpacing: 1.5,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
 
               const SizedBox(height: 30),

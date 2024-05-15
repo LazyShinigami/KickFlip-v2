@@ -159,7 +159,7 @@ class _SellerAllListingsPageState extends State<SellerAllListingsPage> {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const CircularProgressIndicator(color: Colors.black);
                   } else if (snapshot.hasError) {
-                    return Text(
+                    return MyText(
                         'Error: ${snapshot.error}\nPlease try restarting the app!');
                   } else {
                     if (snapshot.data!.isEmpty) {
@@ -170,16 +170,15 @@ class _SellerAllListingsPageState extends State<SellerAllListingsPage> {
                       return SingleChildScrollView(
                         child: Column(
                           children: [
-                            // snapshot.data!.forEach((kfProduct) =>
-                            // ListingWidget(product: kfProduct, user: widget.user)),
+                            for (int i = 0; i < snapshot.data!.length; i++)
+                              ListingWidget(
+                                  product: snapshot.data![i],
+                                  user: widget.user),
+                            MyText('---- End of section ----',
+                                color: Colors.grey, size: 14, spacing: 2),
                           ],
                         ),
                       );
-
-                      // return ListingWidget(
-                      //     product: snapshot.data![i], user: widget.user);
-                      // return  ListingWidget(
-                      //       product: snapshot.data![i], user: widget.user);
                     }
                   }
                 },

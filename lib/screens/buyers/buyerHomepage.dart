@@ -74,7 +74,7 @@ class _BuyerHomepageState extends State<BuyerHomepage> {
 
                     // Fresh Arrivals Product Row
                     FutureBuilder(
-                      future: FirestoreService().getAllProducts(),
+                      future: FirestoreService().getAllProducts(user),
                       builder: (context, snapshot) {
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
@@ -94,7 +94,10 @@ class _BuyerHomepageState extends State<BuyerHomepage> {
                                     for (int i = 0;
                                         i < snapshot.data!.length;
                                         i++)
-                                      SneakerTile(sneaker: snapshot.data![i])
+                                      SneakerTile(
+                                        sneaker: snapshot.data![i],
+                                        user: user,
+                                      )
                                 ],
                               ),
                             );
@@ -141,7 +144,8 @@ class _BuyerHomepageState extends State<BuyerHomepage> {
 
                     // Fresh Arrivals Product Row
                     FutureBuilder(
-                      future: FirestoreService().getAllProductsByGender(gender),
+                      future: FirestoreService()
+                          .getAllProductsByGender(gender, user),
                       builder: (context, snapshot) {
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
@@ -200,7 +204,10 @@ class _BuyerHomepageState extends State<BuyerHomepage> {
                                     for (int i = 0;
                                         i < snapshot.data!.length;
                                         i++)
-                                      SneakerTile(sneaker: snapshot.data![i])
+                                      SneakerTile(
+                                        sneaker: snapshot.data![i],
+                                        user: user,
+                                      )
                                 ],
                               ),
                             );

@@ -19,31 +19,32 @@ class Root extends StatelessWidget {
     return StreamBuilder(
       stream: auth.userStream,
       builder: (context, snapshot) {
-        print("----> ${snapshot.data.runtimeType}");
         if (snapshot.data != null) {
           var user = snapshot.data!;
           print('USER DATA: $user');
 
           // Make the following line conditional - depending on user.type from our KFUser class object
           return FutureBuilder(
-              future: AuthService().getUserDetails(snapshot.data!.email!),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
-                } else {
-                  if (snapshot.hasData) {
-                    if (snapshot.data!.type == 'buyer') {
-                      return BuyerHomepage(user: snapshot.data!);
-                    } else {
-                      return SellerHomepage(user: snapshot.data!);
-                    }
+            future: AuthService().getUserDetails(user.email!),
+            builder: (context, ssnapshot) {
+              if (ssnapshot.connectionState == ConnectionState.waiting) {
+                return Center(child: CircularProgressIndicator());
+              } else {
+                print('///===${ssnapshot.data.runtimeType}');
+                if (ssnapshot.hasData) {
+                  if (ssnapshot.data!.type == 'buyer') {
+                    return BuyerHomepage(user: ssnapshot.data!);
                   } else {
-                    return Center(
-                      child: MyText('No account found', color: Colors.white),
-                    );
+                    return SellerHomepage(user: ssnapshot.data!);
                   }
+                } else {
+                  return Center(
+                    child: AuthPageHandler(),
+                  );
                 }
-              });
+              }
+            },
+          );
         } else {
           return const AuthPageHandler();
         }

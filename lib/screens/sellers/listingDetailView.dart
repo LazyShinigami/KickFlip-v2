@@ -2,6 +2,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:kickflip/commons.dart';
 import 'package:kickflip/constants.dart';
+import 'package:kickflip/firebase/firestoreHandler.dart';
 import 'package:kickflip/models.dart';
 import 'package:kickflip/screens/commonElements/appbar.dart';
 import 'package:kickflip/screens/sellers/models.dart';
@@ -19,29 +20,34 @@ class _ListingDetailViewState extends State<ListingDetailView> {
   _ListingDetailViewState(this.product, this.user);
   KFUser user;
   KFProduct product;
-  final int _currentIndex = 0;
   late List<BidItem> bids = [];
+  int currentImageIndex = 0;
+  late List<String> allImages;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    allImages = [product.thumbnailImage];
+    product.otherImages.forEach((imgUrl) {
+      allImages.add(imgUrl);
+    });
 
     // You already have products.bidders value, convert that into BidItem class object, as shown below, in order to use it
     // Actually no this might need more tampering
     bids = [
-      BidItem(pID: product.pID, bidPrice: 10000, bID: 1234, bName: 'Buyer 1'),
-      BidItem(pID: product.pID, bidPrice: 4000, bID: 2343, bName: 'Buyer 2'),
-      BidItem(pID: product.pID, bidPrice: 8000, bID: 5464, bName: 'Buyer 3'),
-      BidItem(pID: product.pID, bidPrice: 12500, bID: 3455, bName: 'Buyer 4'),
-      BidItem(pID: product.pID, bidPrice: 9500, bID: 9867, bName: 'Buyer 5'),
-      BidItem(pID: product.pID, bidPrice: 4750, bID: 7885, bName: 'Buyer 6'),
-      BidItem(pID: product.pID, bidPrice: 8000, bID: 5745, bName: 'Buyer 7'),
-      BidItem(pID: product.pID, bidPrice: 9000, bID: 3447, bName: 'Buyer 8'),
-      BidItem(pID: product.pID, bidPrice: 11500, bID: 8075, bName: 'Buyer 9'),
-      BidItem(pID: product.pID, bidPrice: 10000, bID: 2534, bName: 'Buyer 10'),
-      BidItem(pID: product.pID, bidPrice: 15000, bID: 2141, bName: 'Buyer 11'),
-      BidItem(pID: product.pID, bidPrice: 1000, bID: 5422, bName: 'Buyer 12'),
+      // BidItem(pID: product.pID, bidAmount: 10000, bID: 1234, bName: 'Buyer 1'),
+      // BidItem(pID: product.pID, bidAmount: 4000, bID: 2343, bName: 'Buyer 2'),
+      // BidItem(pID: product.pID, bidAmount: 8000, bID: 5464, bName: 'Buyer 3'),
+      // BidItem(pID: product.pID, bidAmount: 12500, bID: 3455, bName: 'Buyer 4'),
+      // BidItem(pID: product.pID, bidAmount: 9500, bID: 9867, bName: 'Buyer 5'),
+      // BidItem(pID: product.pID, bidAmount: 4750, bID: 7885, bName: 'Buyer 6'),
+      // BidItem(pID: product.pID, bidAmount: 8000, bID: 5745, bName: 'Buyer 7'),
+      // BidItem(pID: product.pID, bidAmount: 9000, bID: 3447, bName: 'Buyer 8'),
+      // BidItem(pID: product.pID, bidAmount: 11500, bID: 8075, bName: 'Buyer 9'),
+      // BidItem(pID: product.pID, bidAmount: 10000, bID: 2534, bName: 'Buyer 10'),
+      // BidItem(pID: product.pID, bidAmount: 15000, bID: 2141, bName: 'Buyer 11'),
+      // BidItem(pID: product.pID, bidAmount: 1000, bID: 5422, bName: 'Buyer 12'),
     ];
   }
 
@@ -60,8 +66,77 @@ class _ListingDetailViewState extends State<ListingDetailView> {
               const SizedBox(height: 20),
               // Image
               Container(
-                height: 275,
                 color: Colors.grey,
+                height: 300,
+                child: PageView.builder(
+                  onPageChanged: (value) {
+                    currentImageIndex = value;
+                    setState(() {});
+                  },
+                  itemCount: 6,
+                  itemBuilder: (context, index) {
+                    currentImageIndex = index;
+                    return Image.network(
+                      allImages[index],
+                      fit: BoxFit.cover,
+                      loadingBuilder: (BuildContext context, Widget child,
+                          ImageChunkEvent? loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return Transform.scale(
+                          scaleX: 0.5,
+                          scaleY: 0.35,
+                          child: Container(
+                            height: 50,
+                            width: 50,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.black,
+                              value: loadingProgress.expectedTotalBytes != null
+                                  ? loadingProgress.cumulativeBytesLoaded /
+                                      loadingProgress.expectedTotalBytes!
+                                  : null,
+                            ),
+                          ),
+                        );
+                      },
+                      errorBuilder: (context, error, stackTrace) {
+                        return Text('Error loading image');
+                      },
+                    );
+                  },
+                ),
+              ),
+
+              // Image Progress Indicator
+              const SizedBox(height: 5),
+              Center(
+                child: Container(
+                  key: UniqueKey(),
+                  height: 12.5,
+                  width: 150,
+                  decoration: BoxDecoration(
+                    color: Color(0x2A000000),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      const SizedBox(width: 10),
+                      for (int i = 0; i < 6; i++)
+                        Container(
+                          height: (currentImageIndex == i) ? 8 : 6,
+                          width: (currentImageIndex == i) ? 8 : 6,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(50),
+                            color: (currentImageIndex == i)
+                                ? Color.fromARGB(61, 0, 0, 0)
+                                : Colors.white,
+                          ),
+                        ),
+                      const SizedBox(width: 10),
+                    ],
+                  ),
+                ),
               ),
 
               // Title
@@ -73,6 +148,26 @@ class _ListingDetailViewState extends State<ListingDetailView> {
                 spacing: 1.5,
                 overflow: TextOverflow.ellipsis,
                 maxLines: 1,
+              ),
+
+              // Seller Name
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  MyText(
+                    'Sold By: ',
+                    weight: FontWeight.w600,
+                    spacing: 1,
+                    size: 12,
+                    color: Color(0xFF5B5B5B),
+                  ),
+                  MyText(
+                    widget.product.sellerName,
+                    spacing: 1,
+                    size: 12,
+                    color: Color(0xFF5B5B5B),
+                  ),
+                ],
               ),
 
               // Desc
@@ -104,6 +199,13 @@ class _ListingDetailViewState extends State<ListingDetailView> {
                 ],
               ),
 
+              // ListedTimeStamp on date
+              const SizedBox(height: 5),
+              MyText(
+                'Posted on: ${widget.product.listedTimeStamp!.split('|').first} @ ${widget.product.listedTimeStamp!.split('|').last}',
+                size: 14,
+              ),
+
               // Price - Not sold yet / 12000
 
               // Line Chart - Top 10 or less Bidders
@@ -130,10 +232,14 @@ class _ListingDetailViewState extends State<ListingDetailView> {
                             actions: [
                               // Confirm Button
                               GestureDetector(
-                                onTap: () {
+                                onTap: () async {
                                   print(
                                       'Call firebase function that removes the product here');
-                                  Navigator.of(context).pop();
+                                  await FirestoreService()
+                                      .removeProduct(pID: product.pID);
+
+                                  Navigator.pop(context);
+                                  Navigator.pop(context);
                                 },
                                 child: MyText(
                                   'Confirm',
@@ -213,12 +319,27 @@ class _ListingDetailViewState extends State<ListingDetailView> {
         children: [
           MyText('All Your Bids', spacing: 2, weight: FontWeight.bold),
           const SizedBox(height: 20),
-          Container(
-            child: (bids.isNotEmpty)
-                ? BidsTableBuilder(bids: bids)
-                : Center(
-                    child: MyText('No Bids Yet!', spacing: 2, size: 12),
-                  ),
+          FutureBuilder(
+            future:
+                FirestoreService().getAllBidsOnThisProject(pID: product.pID),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(
+                    child: CircularProgressIndicator(
+                        strokeWidth: 2, color: Colors.black));
+              } else {
+                if (snapshot.data != null) {
+                  List<BidItem> items = snapshot.data!;
+
+                  return BidsTableBuilder(bids: items);
+                } else {
+                  return Center(
+                    child: MyText(
+                        'No bids made on this product yet ${snapshot.data}'),
+                  );
+                }
+              }
+            },
           ),
         ],
       ),
@@ -241,9 +362,27 @@ class _ListingDetailViewState extends State<ListingDetailView> {
             spacing: 2,
           ),
           const SizedBox(height: 20),
-          LineChartBuilder(
-            data: bids,
-          ),
+          FutureBuilder(
+              future:
+                  FirestoreService().getAllBidsOnThisProject(pID: product.pID),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2, color: Colors.black));
+                } else {
+                  if (snapshot.data != null) {
+                    List<BidItem> items = snapshot.data!;
+
+                    return LineChartBuilder(data: items);
+                  } else {
+                    return Center(
+                      child: MyText(
+                          'No bids made on this product yet ${snapshot.data}'),
+                    );
+                  }
+                }
+              })
         ],
       ),
     );
@@ -264,7 +403,7 @@ class LineChartBuilder extends StatelessWidget {
 
     // Extraction
     for (int i = 0; i < data.length; i++) {
-      prices.add(data[i].bidPrice);
+      prices.add(data[i].bidAmount);
       buyers.add(data[i].bID);
     }
     double minPrice = 0;
@@ -278,6 +417,7 @@ class LineChartBuilder extends StatelessWidget {
           '${prices.reduce((value, element) => value > element ? value : element)}');
       print('-- $minPrice ++ $maxPrice --');
     }
+
     //
     return Center(
       child: Container(
@@ -285,7 +425,7 @@ class LineChartBuilder extends StatelessWidget {
         padding: (prices.isNotEmpty)
             ? const EdgeInsets.fromLTRB(0, 10, 0, 0)
             : const EdgeInsets.fromLTRB(0, 5, 0, 30),
-        child: (prices.isNotEmpty)
+        child: (prices.isNotEmpty && prices.length > 1)
             ? LineChart(
                 LineChartData(
                   borderData: FlBorderData(
@@ -303,7 +443,15 @@ class LineChartBuilder extends StatelessWidget {
                     leftTitles: AxisTitles(
                       axisNameSize: 10,
                       sideTitles: SideTitles(
-                        interval: (maxPrice - minPrice) / 5,
+                        interval: 10,
+                        showTitles: false,
+                        reservedSize: 50,
+                      ),
+                    ),
+                    bottomTitles: AxisTitles(
+                      axisNameSize: 10,
+                      sideTitles: SideTitles(
+                        interval: 3,
                         showTitles: true,
                         reservedSize: 50,
                       ),
@@ -312,7 +460,7 @@ class LineChartBuilder extends StatelessWidget {
                   lineBarsData: [
                     LineChartBarData(
                       spots: [
-                        for (int i = 1; i < 11; i++)
+                        for (int i = 0; i < data.length; i++)
                           FlSpot(
                             i.toDouble(),
                             prices[i].toDouble(),
@@ -329,7 +477,8 @@ class LineChartBuilder extends StatelessWidget {
                 ),
               )
             : Center(
-                child: MyText('No Bids Yet!', spacing: 2, size: 12),
+                child: MyText('Not enough bids to avail this feature yet',
+                    spacing: 2, size: 12),
               ),
       ),
     );
@@ -350,10 +499,10 @@ class _BidsTableBuilderState extends State<BidsTableBuilder> {
   @override
   Widget build(BuildContext context) {
     (sortFactor == 'descending')
-        ? // Sorting the list by bidPrice in ascending order
-        widget.bids.sort((a, b) => a.bidPrice.compareTo(b.bidPrice))
-        : // Sorting the list by bidPrice in descending order
-        widget.bids.sort((a, b) => b.bidPrice.compareTo(a.bidPrice));
+        ? // Sorting the list by bidAmount in ascending order
+        widget.bids.sort((a, b) => a.bidAmount.compareTo(b.bidAmount))
+        : // Sorting the list by bidAmount in descending order
+        widget.bids.sort((a, b) => b.bidAmount.compareTo(a.bidAmount));
 
     return Container(
       decoration: BoxDecoration(
@@ -423,7 +572,7 @@ class _BidsTableBuilderState extends State<BidsTableBuilder> {
                     ),
                   ),
                   DataCell(
-                    MyText(widget.bids[i].bidPrice.toString(), size: 12),
+                    MyText(widget.bids[i].bidAmount.toString(), size: 12),
                   ),
                   DataCell(
                     Row(
@@ -484,7 +633,7 @@ class _BidsTableBuilderState extends State<BidsTableBuilder> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             MyText('Bid Amount', size: 14, spacing: 1),
-                            MyText('${bid.bidPrice.toDouble()}', size: 14)
+                            MyText('${bid.bidAmount.toDouble()}', size: 14)
                           ],
                         ),
 
@@ -493,7 +642,7 @@ class _BidsTableBuilderState extends State<BidsTableBuilder> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             MyText('Platform Fee', size: 14, spacing: 1),
-                            MyText('- ${bid.bidPrice * 0.2}', size: 14)
+                            MyText('- ${bid.bidAmount * 0.2}', size: 14)
                           ],
                         ),
 
@@ -510,7 +659,7 @@ class _BidsTableBuilderState extends State<BidsTableBuilder> {
                                 color: (action == 'accept')
                                     ? Colors.green
                                     : Colors.red),
-                            MyText('${bid.bidPrice * 0.8}',
+                            MyText('${bid.bidAmount * 0.8}',
                                 size: 14,
                                 color: (action == 'accept')
                                     ? Colors.green

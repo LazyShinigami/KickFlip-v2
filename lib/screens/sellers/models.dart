@@ -7,10 +7,13 @@ class SellerData {
 class BidItem {
   BidItem({
     required this.pID,
-    required this.bidPrice,
+    required this.bidAmount,
     required this.bID,
     required this.bName,
+    required this.bidderUID,
+    required this.sID,
+    required this.status,
   });
-  int bidPrice, pID, bID;
-  String bName;
+  int bidAmount, pID, bID, bidderUID, sID;
+  String bName, status;
 }

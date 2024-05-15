@@ -59,10 +59,12 @@ class KFUser {
     required this.name,
     required this.email,
     required this.type,
+    required this.favs,
   });
   int uID;
   String? type, name;
   String email;
+  List favs;
 }
 
 class KFProduct {
@@ -76,23 +78,25 @@ class KFProduct {
     required this.costPrice,
     required this.color,
     required this.gender,
-    required this.receiptImg,
+    required this.receiptImage,
     required this.shoeSize,
-    required this.thumbnailImg,
-    required this.otherImgs,
+    required this.thumbnailImage,
+    required this.otherImages,
     required this.category,
+    required this.sellerName,
+    required this.inTransit,
     this.saleDate,
     this.salePrice,
     this.bidders,
-    this.listedDate,
+    this.listedTimeStamp,
     this.bID,
     this.buyerName,
   });
 
   // , , , receipt img, shoeSize, thumbnail img, otherImgs, salePrice;
-  bool? inTransit;
+  bool inTransit;
   int pID, sID, costPrice, shoeSize;
-  List otherImgs;
+  List<dynamic> otherImages;
   String name,
       desc,
       category,
@@ -100,17 +104,69 @@ class KFProduct {
       brand,
       color,
       gender,
-      thumbnailImg,
-      receiptImg;
+      thumbnailImage,
+      receiptImage;
 
   int? bID, salePrice;
-  String? saleDate, listedDate, buyerName;
+  String? saleDate, listedTimeStamp, buyerName;
   List<int>? bidders;
 
   // Auxillary Properties
   // fav -- depending on uID of buyers
   bool? fav;
   // sellerName -- fetch using the sID property
-  String? sellerName;
+  String sellerName;
   // List of buyers (bIDs) who have bid on the product
 }
+
+// class KFProduct {
+//   KFProduct({
+//     required this.pID,
+//     required this.sID,
+//     this.name,
+//     this.desc,
+//     this.status,
+//     this.brand,
+//     required this.costPrice,
+//     this.color,
+//     this.gender,
+//     this.receiptImage,
+//     required this.shoeSize,
+//     this.thumbnailImage,
+//     required this.otherImages,
+//     this.category,
+//     required this.sellerName,
+//     required this.inTransit,
+//     this.saleDate,
+//     this.salePrice,
+//     this.bidders,
+//     this.listedDate,
+//     this.bID,
+//     this.buyerName,
+//   });
+
+//   // , , , receipt img, shoeSize, thumbnail img, otherImgs, salePrice;
+//   bool inTransit;
+//   int pID, sID, costPrice, shoeSize;
+//   List<dynamic> otherImages;
+//   String? name,
+//       desc,
+//       category,
+//       status,
+//       brand,
+//       color,
+//       gender,
+//       thumbnailImage,
+//       receiptImage;
+
+//   int? bID, salePrice;
+//   String? saleDate, listedDate, buyerName;
+//   List<int>? bidders;
+
+//   // Auxillary Properties
+//   // fav -- depending on uID of buyers
+//   bool? fav;
+//   // sellerName -- fetch using the sID property
+//   String sellerName;
+//   // List of buyers (bIDs) who have bid on the product
+// }
